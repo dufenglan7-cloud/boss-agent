@@ -221,3 +221,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# boss-agent local state and secrets
+.env
+.env.*
+!.env.example
+data/
+playwright/.auth/
+.auth/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.venv/

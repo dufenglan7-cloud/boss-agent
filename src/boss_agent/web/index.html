@@ -1,0 +1,48 @@
+<!-- 由 FastAPI 同源提供的工作台；行为由 app.js 绑定，不在模板中保存私人资料。 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><title>求职工作台 · boss-agent</title>
+  <link rel="stylesheet" href="/static/styles.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+<div class="workspace">
+<!-- 会话导航：只展示当前标识的历史摘要。 -->
+  <aside class="sidebar" aria-label="会话导航">
+    <a class="brand" href="/"><span class="brand-mark">b<span>·</span></span><span>boss-agent<small>你的求职搭档</small></span></a>
+    <button id="new-session" class="new-session"><span aria-hidden="true">＋</span> 新建对话</button>
+    <button id="history-toggle" class="history-toggle" aria-expanded="false" type="button">会话</button>
+    <div class="section-label">最近的对话</div><nav id="session-list" aria-label="最近的对话"></nav>
+    <div class="sidebar-bottom"><div class="agent-stack"><i></i><span>4 个独立 Agent，协作完成</span></div><p>对话理解 · 简历画像<br>岗位匹配 · 沟通文案</p><a href="/docs" target="_blank" rel="noopener">查看接口文档 <span aria-hidden="true">↗</span></a></div>
+  </aside>
+  <main class="main">
+<!-- 姓名标识用于本地逻辑分区，不是登录或身份校验。 -->
+    <header class="topbar"><div><span class="eyebrow">WORKSPACE</span><h1>求职对话</h1></div><div class="topbar-actions"><div class="user-switch"><label for="user-id">当前用户</label><input id="user-id" maxlength="64" placeholder="姓名或 user_id" aria-label="姓名或用户标识"><button id="switch-user" type="button">切换用户</button></div><span id="model-status" class="status-pill">连接服务中</span><button id="context-toggle" class="button-quiet" aria-expanded="false">简历与职位</button></div></header>
+    <div class="content-grid">
+<!-- 对话记录使用无障碍 log 区域，新增消息可被辅助阅读工具感知。 -->
+      <section class="conversation" aria-label="求职对话">
+        <div id="mode-notice" class="mode-notice">正在读取运行模式…</div>
+        <div id="messages" class="messages" role="log" aria-label="对话记录" aria-live="polite"></div>
+        <div class="composer-area"><div id="error" class="error" role="alert" hidden></div>
+<!-- 输入保持可编辑；提交成功后采用后端返回的新会话版本。 -->
+          <form id="chat-form" class="composer"><label for="message" class="sr-only">输入求职要求或问题</label><textarea id="message" rows="2" maxlength="6000" placeholder="告诉我你想找的工作，或聊聊你的项目经历…" required></textarea><div class="composer-footer"><span>Enter 发送 · Shift + Enter 换行</span><button id="send" type="submit" class="button-primary">发送消息</button></div></form>
+          <p class="composer-hint">你的明确要求决定方向，简历提供能力依据。当前仅生成计划，未接入真实投递。</p>
+        </div>
+      </section>
+<!-- 资料面板中的编辑随下一条消息提交；单独的画像纠正通过专用 API 保存。 -->
+      <aside id="context-panel" class="context-panel" aria-label="求职资料">
+        <div class="context-heading"><span class="eyebrow">YOUR CONTEXT</span><h2>让匹配更了解你</h2><p>添加资料后，和 Agent 一起确定方向。</p></div>
+        <label class="field-label" for="mode">会话模式</label><select id="mode"><option value="demo">演示模式 · 无需模型</option><option value="llm">模型模式 · 真实分析</option></select><p class="field-hint">切换模式会新建对话。模型密钥仅在服务端配置。</p>
+        <section class="context-section"><div class="label-row"><label for="resume" class="field-label">我的简历</label><label class="file-button" for="resume-file">导入文件</label><input id="resume-file" type="file" accept=".txt,.md,text/plain,text/markdown" class="sr-only"></div><textarea id="resume" rows="6" maxlength="100000" placeholder="粘贴简历，或导入 TXT / Markdown 文件。经历、技能与项目越具体越好。"></textarea><p id="resume-meta" class="field-hint">资料会随下一条消息一起保存到本机会话。</p></section>
+        <section class="context-section"><div class="label-row"><label for="jobs" class="field-label">待分析职位</label><label class="file-button" for="jobs-file">导入 JSON</label><input id="jobs-file" type="file" accept=".json,application/json" class="sr-only"></div><textarea id="jobs" rows="4" spellcheck="false" placeholder='粘贴职位 JSON 数组，例如 [{"id":"1", "title":"…", ...}]'></textarea><div class="label-row"><span id="jobs-meta" class="field-hint">尚未导入职位</span><button id="load-sample" class="text-button" type="button">载入虚构示例</button></div></section>
+        <button id="generate-plan" class="plan-button" type="button">生成求职计划</button><p class="field-hint centered">需要简历和至少一个导入职位</p>
+<!-- 画像编辑仅开放业务字段，版本由脚本从服务端读取并在保存时携带。 -->
+        <details class="portrait-editor" id="portrait-editor"><summary>长期求职画像</summary><p class="field-hint">按当前姓名或 user_id 保存。演示与模型模式分别存储。</p><button id="refresh-portrait" type="button" class="text-button">读取最新画像</button><p id="portrait-status" class="field-hint"></p><label for="portrait-json" class="field-label">查看或纠正画像（JSON）</label><textarea id="portrait-json" rows="7" spellcheck="false"></textarea><button id="save-portrait" type="button" class="text-button">保存纠正</button> <button id="reset-portrait" type="button" class="text-button">清除长期画像</button><p class="field-hint">资料及近期关注可修改；清除不会删除历史对话。近期关注默认保留 30 天。</p></details>
+        <div id="insights" class="insights" hidden></div><section id="plan" class="plan-panel" aria-label="求职计划" hidden></section>
+        <div class="context-note"><span aria-hidden="true">◇</span><p>当前职位需手动导入。生成计划不会向招聘者发送消息或简历。</p></div>
+      </aside>
+    </div>
+  </main>
+</div>
+</body></html>

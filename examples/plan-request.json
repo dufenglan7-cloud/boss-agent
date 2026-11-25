@@ -1,0 +1,6 @@
+{
+  "mode": "demo",
+  "resume_text": "【虚构演示简历】掌握 Python，做过大模型 API 问答应用。",
+  "requirements": "杭州，偏 AI Agent 应用开发，月薪不低于 20000",
+  "jobs": [{"id": "demo-api-001", "title": "AI Agent 应用开发", "company": "虚构示例公司", "city": "杭州", "salary_min": 20000, "salary_max": 30000, "description": "使用 Python 开发 Agent 应用。"}]
+}
